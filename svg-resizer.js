@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 require('shelljs/global');
+const { execFileSync } = require('child_process');
 var path = require('path');
 var fs = require('fs-extra');
 var _ = require('lodash');
@@ -18,8 +19,8 @@ var pxToPt = function(px) {
 
 
 if (!which('rsvg-convert')) {
-  echo('rsvg-convert bin from libsrvg is required');
-  exit(1);
+  console.log('rsvg-convert bin from libsrvg is required');
+  process.exit(1);
 }
 
 program
@@ -35,7 +36,7 @@ var opts = program.opts();
 
 
 // create output folder if dont exist
-mkdir('-p', path.join(opts.output));
+fs.mkdirpSync(path.join(opts.output));
 
 var dpi = 96;
 var svgFiles = [opts.input];
@@ -87,13 +88,16 @@ svgFiles.forEach(function(svgPath) {
     ]);
 
     // print rsvg command
-    echo('rsvg-convert ' + args.join(' '));
+    console.log('rsvg-convert' + args.join(' '));
 
     // resize file with librsvg
-    var convert = exec('rsvg-convert ' + args.join(' '));
-
-    if (convert.code !== 0) {
-        echo('Error converting file: ' + svgPath);
+    try{
+      execFileSync('rsvg-convert ', args, {
+        encoding: 'utf8'
+      });
+    } catch {
+      console.log('Error converting file: ' + svgPath);
+      return;
     }
 
     // read resized file and change pt to px
@@ -116,4 +120,4 @@ svgFiles.forEach(function(svgPath) {
 
 });
 
-exit(0);
+process.exit(0);
