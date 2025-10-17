@@ -76,23 +76,26 @@ svgFiles.forEach(function(svgPath) {
     // build args
     var outputPath =  opts.output ? path.join(opts.output, path.basename(svgPath, '.svg') + '.' + opts.format) : '';
 
-    var args = _.compact([
-        opts.width ? '-w ' + opts.width : null,
-        opts.height ? '-h ' + opts.height : null,
-        '--keep-aspect-ratio',
-        '--dpi-x 90', // work with pixels
-        '--dpi-y 90', // work with pixels
-        '-f ' + opts.format,
-        svgPath,
-        '-o ' + outputPath
-    ]);
+    var args = [];
+    if (opts.width) {
+        args.push('-w', String(opts.width));
+    }
+    if (opts.height) {
+        args.push('-h', String(opts.height));
+    }
+    args.push('--keep-aspect-ratio');
+    args.push('--dpi-x', '90'); // work with pixels
+    args.push('--dpi-y', '90'); // work with pixels
+    args.push('-f', opts.format);
+    args.push(svgPath);
+    args.push('-o', outputPath);
 
     // print rsvg command
     console.log('rsvg-convert' + args.join(' '));
 
     // resize file with librsvg
     try{
-      execFileSync('rsvg-convert ', args, {
+      execFileSync('rsvg-convert', args, {
         encoding: 'utf8'
       });
     } catch {
